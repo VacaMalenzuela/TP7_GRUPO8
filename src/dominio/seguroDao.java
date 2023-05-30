@@ -1,13 +1,5 @@
 package dominio;
 
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.ArrayList;
-
 public class seguroDao {
 
 	private String host = "jdbc:mysql://localhost:3306/";
@@ -41,7 +33,73 @@ public class seguroDao {
 			e.printStackTrace();
 		}
 		return filas;
+	
 	}
+	
+	public ArrayList<Seguro> obtenerSeguros() {
+
+		ArrayList<Seguro> lista = new ArrayList<Seguro>();
+		Connection conn = null;
+		try{
+			conn = DriverManager.getConnection(host + dbName, user, pass);
+			Statement st = conn.createStatement();
+			
+			ResultSet rs = st.executeQuery("Select idSeguro,descripcion,idTipo,costoContratacion,costoAsegurado FROM seguros");
+			
+			while(rs.next()){
+				
+				Seguro seguroRs = new Seguro();
+				seguroRs.setId(rs.getInt("idSeguro"));
+				seguroRs.setDescripcion(rs.getString("descripcion"));
+				seguroRs.setIdTipo(rs.getInt("idTipo"));
+				seguroRs.setCostoContratacion(rs.getDouble("costoContratacion"));
+				seguroRs.setCostoAsegurado(rs.getDouble("costoAsegurado"));
+				
+				lista.add(seguroRs);
+			}
+			conn.close();
+		}catch(Exception e){
+			e.printStackTrace();
+		}finally{
+		
+		}
+		
+		return lista;
+	}
+
+	
+	
+	public Seguro obtenerUnSeguro(int id)
+	{
+
+		Seguro seguro = new Seguro();
+		Connection con = null;
+		try{
+			con = DriverManager.getConnection(host + dbName, user, pass);
+			PreparedStatement miSentencia = con.prepareStatement("Select * from seguros where idSeguro = ?");
+			miSentencia.setInt(1, id); //Cargo el ID recibido
+			ResultSet resultado = miSentencia.executeQuery();
+			resultado.next();
+			
+			seguro.setId(resultado.getInt(1));
+			seguro.setDescripcion(resultado.getString(2));
+			seguro.setIdTipo(resultado.getInt(3));
+			seguro.setCostoContratacion(resultado.getDouble(4));
+			seguro.setCostoAsegurado(resultado.getDouble(5));
+		    
+		    con.close();
+		}
+		catch(Exception e)
+		{
+			System.out.println("Conexion fallida");
+		}
+		finally
+		{
+		}
+		return seguro;
+	}
+	
+	
 	/* 
 	 DELIMITER $$
 	 CREATE PROCEDURE `crearUsuario`(IN Unombre varchar(45), IN Uapellido varchar(45))
