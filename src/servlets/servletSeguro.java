@@ -1,6 +1,7 @@
 package servlets;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -11,6 +12,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import dominio.Seguro;
 import dominio.seguroDao;
+import dominio.tipoSeguro;
+import dominio.tipoSeguroDao;
 
 
 @WebServlet("/servletSeguro")
@@ -33,7 +36,9 @@ public class servletSeguro extends HttpServlet {
 				double valorMaximoAsegurado = Double.parseDouble(request.getParameter("txtCostoMaximoAsegurado"));
 				Seguro seg = new Seguro(); 
 				seg.setDescripcion(request.getParameter("txtDescripcion"));
-				seg.setIdTipo(valorComboBox);
+				tipoSeguroDao tsDao = new tipoSeguroDao(); 
+				tipoSeguro tSeguro = tsDao.obtenerUnTipoSeguro(valorComboBox);
+				seg.setIdTipo(tSeguro);
 				seg.setCostoContratacion(valorCosto);
 				seg.setCostoAsegurado(valorMaximoAsegurado);
 				seguroDao segDao = new seguroDao(); 
@@ -53,8 +58,23 @@ public class servletSeguro extends HttpServlet {
 
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		doGet(request, response);
+		if (request.getParameter("btnFiltrar") != null) { 
+			seguroDao sdao = new seguroDao(); 
+			ArrayList<Seguro> lista = sdao.obtenerSegurosPorTipo(request.getParameter("tipoSeguro"));
+			//ArrayList<Seguro> lista = sdao.obtenerSeguros();
+			request.setAttribute("listaFiltrada", lista);
+			RequestDispatcher rd = request.getRequestDispatcher("/ListarSeguro.jsp");
+			rd.forward(request, response);
+		} else { 
+			seguroDao sdao = new seguroDao(); 
+			
+			ArrayList<Seguro> lista = sdao.obtenerSeguros();
+			request.setAttribute("listaFiltrada", lista);
+			RequestDispatcher rd = request.getRequestDispatcher("/ListarSeguro.jsp");
+			rd.forward(request, response);
+		}
+		
+	
 	}
 
 }

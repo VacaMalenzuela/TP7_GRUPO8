@@ -1,12 +1,18 @@
 package dominio;
 
 public class Seguro {
-	
 	private int Id;
 	private String Descripcion; 
-	private int IdTipo; 
+	private tipoSeguro tSeguro; 
 	private double CostoContratacion; 
 	private double CostoAsegurado;
+	
+	public Seguro(){}
+
+	
+	
+	
+	
 	public int getId() {
 		return Id;
 	}
@@ -19,11 +25,11 @@ public class Seguro {
 	public void setDescripcion(String descripcion) {
 		Descripcion = descripcion;
 	}
-	public int getIdTipo() {
-		return IdTipo;
+	public tipoSeguro getIdTipo() {
+		return tSeguro;
 	}
-	public void setIdTipo(int idTipo) {
-		IdTipo = idTipo;
+	public void setIdTipo(tipoSeguro idTipo) {
+		tSeguro = idTipo;
 	}
 	public double getCostoContratacion() {
 		return CostoContratacion;
@@ -38,4 +44,12 @@ public class Seguro {
 		CostoAsegurado = costoAsegurado;
 	}
 
+	
+	@Override
+	public String toString() {
+		return "Seguro [Id=" + Id + ", Descripcion=" + Descripcion + ", tSeguro=" + tSeguro.getDescripcion() + ", CostoContratacion="
+				+ CostoContratacion + ", CostoAsegurado=" + CostoAsegurado + "]";
+	}
+		
+	
 }

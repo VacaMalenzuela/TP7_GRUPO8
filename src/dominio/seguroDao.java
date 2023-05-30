@@ -1,5 +1,11 @@
 package dominio;
-
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
 public class seguroDao {
 
 	private String host = "jdbc:mysql://localhost:3306/";
@@ -25,7 +31,7 @@ public class seguroDao {
 		{
 			cn = DriverManager.getConnection(host+dbName, user,pass);
 			Statement st = cn.createStatement();
-			String query = "Insert into seguros (descripcion,idTipo,costoContratacion,costoAsegurado) values ('"+seg.getDescripcion()+"',"+seg.getIdTipo()+","+ seg.getCostoContratacion()+","+ seg.getCostoAsegurado()+");";
+			String query = "Insert into seguros (descripcion,idTipo,costoContratacion,costoAsegurado) values ('"+seg.getDescripcion()+"',"+seg.getIdTipo().getId()+","+ seg.getCostoContratacion()+","+ seg.getCostoAsegurado()+");";
 			filas=st.executeUpdate(query);
 		}
 		catch(Exception e)
@@ -37,11 +43,16 @@ public class seguroDao {
 	}
 	
 	public ArrayList<Seguro> obtenerSeguros() {
-
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		ArrayList<Seguro> lista = new ArrayList<Seguro>();
 		Connection conn = null;
 		try{
-			conn = DriverManager.getConnection(host + dbName, user, pass);
+			conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/segurosgroup","root","root");
 			Statement st = conn.createStatement();
 			
 			ResultSet rs = st.executeQuery("Select idSeguro,descripcion,idTipo,costoContratacion,costoAsegurado FROM seguros");
@@ -51,9 +62,11 @@ public class seguroDao {
 				Seguro seguroRs = new Seguro();
 				seguroRs.setId(rs.getInt("idSeguro"));
 				seguroRs.setDescripcion(rs.getString("descripcion"));
-				seguroRs.setIdTipo(rs.getInt("idTipo"));
 				seguroRs.setCostoContratacion(rs.getDouble("costoContratacion"));
 				seguroRs.setCostoAsegurado(rs.getDouble("costoAsegurado"));
+				tipoSeguroDao tsDao = new tipoSeguroDao(); 
+				tipoSeguro ts= tsDao.obtenerUnTipoSeguro(rs.getInt("idTipo"));
+				seguroRs.setIdTipo(ts);
 				
 				lista.add(seguroRs);
 			}
@@ -69,36 +82,48 @@ public class seguroDao {
 
 	
 	
-	public Seguro obtenerUnSeguro(int id)
-	{
-
-		Seguro seguro = new Seguro();
-		Connection con = null;
-		try{
-			con = DriverManager.getConnection(host + dbName, user, pass);
-			PreparedStatement miSentencia = con.prepareStatement("Select * from seguros where idSeguro = ?");
-			miSentencia.setInt(1, id); //Cargo el ID recibido
-			ResultSet resultado = miSentencia.executeQuery();
-			resultado.next();
-			
-			seguro.setId(resultado.getInt(1));
-			seguro.setDescripcion(resultado.getString(2));
-			seguro.setIdTipo(resultado.getInt(3));
-			seguro.setCostoContratacion(resultado.getDouble(4));
-			seguro.setCostoAsegurado(resultado.getDouble(5));
-		    
-		    con.close();
-		}
-		catch(Exception e)
-		{
-			System.out.println("Conexion fallida");
-		}
-		finally
-		{
-		}
-		return seguro;
-	}
 	
+	
+	//Lista de seguros de un solo tipo 
+	public ArrayList<Seguro> obtenerSegurosPorTipo(String idtipo) {
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		ArrayList<Seguro> lista = new ArrayList<Seguro>();
+		Connection conn = null;
+		try{
+			conn = DriverManager.getConnection(host + dbName, user, pass);
+			Statement st = conn.createStatement();
+			String query = "Select idSeguro,descripcion,idTipo,costoContratacion,costoAsegurado FROM seguros where idTipo = "+idtipo;
+			ResultSet rs = st.executeQuery(query);
+			
+			while(rs.next()){
+				
+				Seguro seguroRs = new Seguro();
+				seguroRs.setId(rs.getInt("idSeguro"));
+				seguroRs.setDescripcion(rs.getString("descripcion"));
+				seguroRs.setCostoContratacion(rs.getDouble("costoContratacion"));
+				seguroRs.setCostoAsegurado(rs.getDouble("costoAsegurado"));
+				tipoSeguroDao tsDao = new tipoSeguroDao(); 
+				tipoSeguro ts= tsDao.obtenerUnTipoSeguro(rs.getInt("idTipo"));
+				seguroRs.setIdTipo(ts);
+				
+				lista.add(seguroRs);
+			}
+			conn.close();
+			
+		}catch(Exception e){
+			e.printStackTrace();
+		}finally{
+			
+			
+		}
+		
+		return lista;
+	}
 	
 	/* 
 	 DELIMITER $$
