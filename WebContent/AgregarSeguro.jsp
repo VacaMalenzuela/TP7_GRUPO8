@@ -1,3 +1,6 @@
+<%@ page import="dominio.Seguro" %>
+<%@ page import="dominio.seguroDao" %>
+<%@ page import="java.util.ArrayList" %>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
     
@@ -18,7 +21,11 @@
 <h1>Agregar Seguro</h1>
 
 <form method="get" action="servletSeguro">
-Id Seguro: <br><br>
+<% seguroDao sDao = new seguroDao(); 
+	ArrayList<Seguro> lst = sDao.obtenerSeguros();
+	int proximoId = (lst.get(lst.size()-1)).getId()+1;
+%>
+Id Seguro: <%=proximoId %><br><br>
 Decripcion: <input type="text" name="txtDescripcion"> <br><br>
 Tipo de seguro: <select name="tipoSeguro">
 	<option value="1">Seguro de casas</option>
